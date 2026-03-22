@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.database import engine, Base
-from backend.routes import job_applications
+from backend.routes import job_applications, auth
 
 # Create all database tables
 # This runs once when the app starts
@@ -34,7 +34,10 @@ app.add_middleware(
 )
 
 # Include routers
-# This mounts all the job application routes under /api/jobs
+# Mount authentication routes first (no auth required for these)
+app.include_router(auth.router)
+
+# Mount job application routes (these will be protected by auth)
 app.include_router(job_applications.router)
 
 
