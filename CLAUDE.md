@@ -1,22 +1,33 @@
-# Tech Job Tracker — Mobile
+# Tech Job Tracker — Android
 **Stack:** React Native · Expo · TypeScript · Python · FastAPI  
-**Platform:** iOS & Android (Expo managed workflow)  
+**Platform:** Android only (Expo managed workflow)  
 **Developer:** Joseph McCoy · github.com/jmac052002
 
 ---
 
-## Project Overview
+## Current Status
 
-A mobile job application tracker built for career changers actively in the job hunt.
-Tracks job applications, interview stages, follow-up dates, and application status across companies.
-Python FastAPI backend · React Native Expo frontend · SQLite for local dev · PostgreSQL for production.
-Future cloud integration planned with AWS (S3, RDS, Lambda).
+### Backend — COMPLETE ✅
+- **Routes:** `POST /api/jobs` · `GET /api/jobs` · `GET /api/jobs/{id}` · `PUT /api/jobs/{id}` · `DELETE /api/jobs/{id}`
+- **Model:** `JobApplication` — id, company, position, status, date_applied, notes, follow_up_date
+- **Database:** SQLite (dev) · PostgreSQL-ready via DATABASE_URL env var
+- **Auth:** Not yet implemented — planned (JWT or AWS Cognito under evaluation)
+- **Migrations:** Using `Base.metadata.create_all()` on startup — Alembic needed before production
+- **Docs:** Auto-generated Swagger UI at `http://localhost:8000/docs`
+
+### Frontend — NOT STARTED
+- Expo scaffold not yet created
+- `mobile/` directory does not exist yet
+- Next session will scaffold Expo Router project
+
+### Known Issues / Tech Debt
+- No authentication on any endpoint — all routes are currently open
+- `Base.metadata.create_all()` is a dev shortcut — needs Alembic before any production deployment
+- CORS currently set to `allow_origins=["*"]` — must be locked down before production
 
 ---
 
 ## Session Setup (Read Before Starting)
-
-Before every Claude Code session, these should already be done in the terminal:
 
 ```bash
 cd ~/projects/tech-job-tracker       # navigate to project root
@@ -29,31 +40,48 @@ claude                               # then launch Claude Code
 > ```bash
 > python3 -m venv venv
 > source venv/bin/activate
-> pip install -r requirements.txt
+> pip install -r backend/requirements.txt
 > ```
+
+### Remote Work (Telegram + tmux)
+Claude Code must be actively running inside a tmux session for the Telegram plugin to work.
+```bash
+# Before leaving machine — detach, don't close
+Ctrl+B then D
+
+# Reattach later
+tmux attach
+```
+
+---
+
+## Environment
+
+- Python version: 3.12.3
+- Node version: v24.14.1
+- Expo SDK version: [FILL IN — check mobile/package.json once scaffolded]
 
 ---
 
 ## Project Structure
 
-```
 tech-job-tracker/
 ├── CLAUDE.md                  # this file
+├── PLAN.md                    # original backend build plan — reference only
 ├── backend/
-│   ├── main.py                # FastAPI entry point
-│   ├── models/                # SQLAlchemy or Pydantic models
-│   ├── routes/                # API route handlers
-│   ├── database.py            # DB connection and session
-│   └── requirements.txt
-├── mobile/
-│   ├── app/                   # Expo Router screens
-│   ├── components/            # Reusable UI components
-│   ├── hooks/                 # Custom React hooks
-│   ├── types/                 # TypeScript types/interfaces
-│   └── package.json
+│   ├── main.py                # FastAPI entry point · CORS · router mount
+│   ├── database.py            # DB connection · SessionLocal · get_db()
+│   ├── requirements.txt       # Python dependencies
+│   ├── models/
+│   │   ├── init.py
+│   │   ├── job_application.py # SQLAlchemy model
+│   │   └── schemas.py         # Pydantic request/response schemas
+│   └── routes/
+│       ├── init.py
+│       └── job_applications.py # CRUD route handlers
+├── mobile/                    # NOT CREATED YET — Expo scaffold next
 ├── .env                       # never commit this
-└── .env.example               # safe to commit — no real values
-```
+└── .env.example               # DATABASE_URL placeholder — safe to commit
 
 ---
 
@@ -68,6 +96,8 @@ pytest                               # run all tests
 pip install -r backend/requirements.txt
 ```
 
+API docs available at `http://localhost:8000/docs` when server is running.
+
 ### Frontend (React Native · Expo · TypeScript)
 
 ```bash
@@ -75,8 +105,29 @@ cd mobile
 npm install                          # install dependencies
 npm start                            # start Expo dev server
 npm run android                      # run on Android emulator
-npm run ios                          # run on iOS simulator (Mac only)
 ```
+
+### Expo Go — Physical Device Development
+Development runs on physical device via Expo Go — preferred over emulator.
+Device and laptop must be on the same WiFi network.
+Point API calls at your machine's local IP, 
+never localhost:http://192.168.x.x:8000
+
+Never hardcode this — use environment config.
+
+---
+
+## Test Devices
+
+| Device | OS | Role |
+|---|---|---|
+| Pixel 9 Pro XL | Android 17 beta | Primary dev device |
+| Samsung S23 Ultra | Stable Android | Sanity check — isolates beta OS issues |
+| Xiaomi Mi 11 | MIUI | Stress test — aggressive battery/process limits |
+
+If something looks broken: test on S23 Ultra first.
+If it works on S23 but not Pixel, suspect Android 17 beta.
+If it works everywhere else but not Xiaomi, suspect MIUI killing background processes.
 
 ---
 
@@ -88,14 +139,16 @@ npm run ios                          # run on iOS simulator (Mac only)
 - Pydantic models for request/response validation
 - Keep route handlers thin — business logic goes in service functions
 - Never commit `.env` — use `.env.example` with placeholder values
-- Do not use `any` as a type — always be explicit
+- Never use bare `except` — always catch specific exceptions
+- Never use `any` as a type — always be explicit
 
 ### TypeScript (Frontend)
 - `camelCase` for variables and functions
 - `PascalCase` for component names and TypeScript interfaces
 - Keep components small and single-purpose
-- All API calls go through a dedicated `services/` or `api/` layer
+- All API calls go through `services/` layer — never call fetch directly in a component
 - Never hardcode API URLs — use environment config
+- Never use `any` — always be explicit with types
 
 ### Both
 - Comments explain **why**, not what the code is doing
@@ -112,7 +165,7 @@ I am actively learning while building. When making changes:
 2. **Flag anything security-related** — I want to understand security implications, not just accept them
 3. **If there is more than one way to solve something**, briefly mention the tradeoff so I can learn the decision-making
 4. **Don't hide complexity from me** — I want to understand the code, not just ship it
-5. **I type code myself** when learning new concepts — if I ask to understand something, walk me through it rather than just doing it
+5. **I type code myself** when learning new concepts — walk me through it rather than just doing it
 
 ---
 
@@ -124,32 +177,36 @@ I am actively learning while building. When making changes:
 - Do NOT put business logic inside route handlers — use service functions
 - Do NOT auto-generate migrations without reviewing schema changes first
 - Do NOT silently skip explaining a security concern — always flag it
+- Do NOT suggest iOS-specific solutions — this app is Android only
 
 ---
 
 ## AWS Integration (Planned — Future)
 
-This project will eventually integrate with AWS services:
 - **S3** — resume/document storage
-- **RDS (PostgreSQL)** — production database
+- **RDS (PostgreSQL)** — production database (DATABASE_URL already env-var driven ✅)
 - **Lambda** — background processing or notifications
 - **Cognito** — authentication (under evaluation)
 
-Do not build for AWS yet — flag when a decision will affect future cloud integration.
+Do not build for AWS yet. Flag any current decision that will affect future cloud integration.
 
 ---
 
 ## Git Workflow
 
 ```bash
-git checkout -b feature/your-feature-name   # new branch for each feature
+git checkout -b feature/your-feature-name
 git add .
 git commit -m "descriptive message"
 git push origin feature/your-feature-name
 ```
 
-Ask Claude Code to generate commit messages when needed:
-> "Write a git commit message for everything we just built"
+Claude Code may generate commit messages during sessions. When it does, follow these standards:
+- Imperative mood — "Add job status filter" not "Added job status filter"
+- Subject line under 50 characters
+- Explains **what** changed and **why**, not just that something changed
+- One logical change per commit — no "fix stuff" or "updates" dumps
+- Never commit: venv/, .env, __pycache__, *.db, *.pyc
 
 ---
 
