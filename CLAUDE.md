@@ -22,7 +22,7 @@
 
 ### Known Issues / Tech Debt
 - No authentication on any endpoint — all routes are currently open
-- `Base.metadata.create_all()` is a dev shortcut — needs Alembic before any production deployment
+- `Base.metadata.create_all()` is a dev shortcut — needs Alembic before production
 - CORS currently set to `allow_origins=["*"]` — must be locked down before production
 
 ---
@@ -66,7 +66,7 @@ tmux attach
 ## Project Structure
 
 tech-job-tracker/
-├── CLAUDE.md                  # this file
+├── CLAUDE.md                  # this file — living document, update often
 ├── PLAN.md                    # original backend build plan — reference only
 ├── backend/
 │   ├── main.py                # FastAPI entry point · CORS · router mount
@@ -131,6 +131,66 @@ If it works everywhere else but not Xiaomi, suspect MIUI killing background proc
 
 ---
 
+## Behavioral Guidelines (Karpathy Principles)
+
+These four principles address the most common LLM coding failure modes.
+Merge with any task — they apply universally.
+
+### 1. Think Before Coding
+Don't assume. Don't hide confusion. Surface tradeoffs.
+
+Before implementing:
+- State assumptions explicitly — if uncertain, ask
+- If multiple interpretations exist, present them — don't pick silently
+- If a simpler approach exists, say so — push back when warranted
+- If something is unclear, stop, name what's confusing, and ask
+
+### 2. Simplicity First
+Minimum code that solves the problem. Nothing speculative.
+
+- No features beyond what was asked
+- No abstractions for single-use code
+- No "flexibility" or "configurability" that wasn't requested
+- If you write 200 lines and it could be 50, rewrite it
+
+Ask: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+### 3. Surgical Changes
+Touch only what you must. Clean up only your own mess.
+
+- Don't improve adjacent code, comments, or formatting
+- Don't refactor things that aren't broken
+- Match existing style, even if you'd do it differently
+- If you notice unrelated dead code, mention it — don't delete it
+- Every changed line should trace directly to the user's request
+
+### 4. Goal-Driven Execution
+Define success criteria. Loop until verified.
+
+Transform vague tasks into verifiable goals:
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+
+For multi-step tasks, state a brief plan before starting:
+
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+
+---
+
+## CLAUDE.md Maintenance (Boris Cherny's Rule)
+
+This file is a living document — not a one-time setup.
+
+**After every correction during a session:**
+> "Update your CLAUDE.md so you don't make that mistake again."
+
+Claude is good at writing rules for itself. Use that.
+Ruthlessly edit this file over time. Keep iterating until mistake rate drops.
+
+---
+
 ## Code Conventions
 
 ### Python (Backend)
@@ -165,7 +225,8 @@ I am actively learning while building. When making changes:
 2. **Flag anything security-related** — I want to understand security implications, not just accept them
 3. **If there is more than one way to solve something**, briefly mention the tradeoff so I can learn the decision-making
 4. **Don't hide complexity from me** — I want to understand the code, not just ship it
-5. **I type code myself** when learning new concepts — walk me through it rather than just doing it
+5. **I review all generated code** — explain any non-obvious decision before moving on. I should be able to defend everything
+   in this codebase in an interview.
 
 ---
 
@@ -181,6 +242,24 @@ I am actively learning while building. When making changes:
 
 ---
 
+## Git Workflow
+
+```bash
+git checkout -b feature/your-feature-name
+git add .
+git commit -m "descriptive message"
+git push origin feature/your-feature-name
+```
+
+Claude Code may generate commit messages during sessions. Standards:
+- Imperative mood — "Add job status filter" not "Added job status filter"
+- Subject line under 50 characters
+- Explains what changed and why — not just that something changed
+- One logical change per commit — no "fix stuff" or "updates" dumps
+- Never commit: venv/, .env, __pycache__, *.db, *.pyc
+
+---
+
 ## AWS Integration (Planned — Future)
 
 - **S3** — resume/document storage
@@ -192,27 +271,10 @@ Do not build for AWS yet. Flag any current decision that will affect future clou
 
 ---
 
-## Git Workflow
-
-```bash
-git checkout -b feature/your-feature-name
-git add .
-git commit -m "descriptive message"
-git push origin feature/your-feature-name
-```
-
-Claude Code may generate commit messages during sessions. When it does, follow these standards:
-- Imperative mood — "Add job status filter" not "Added job status filter"
-- Subject line under 50 characters
-- Explains **what** changed and **why**, not just that something changed
-- One logical change per commit — no "fix stuff" or "updates" dumps
-- Never commit: venv/, .env, __pycache__, *.db, *.pyc
-
----
-
 ## Useful References
 
 - GitHub: github.com/jmac052002
 - Expo Docs: https://docs.expo.dev
 - FastAPI Docs: https://fastapi.tiangolo.com
 - React Native Docs: https://reactnative.dev
+- Karpathy Skills: https://github.com/forrestchang/andrej-karpathy-skills
