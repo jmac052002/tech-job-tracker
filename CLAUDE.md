@@ -10,8 +10,10 @@
 ### Backend — COMPLETE ✅
 - **Routes:** `POST /api/jobs` · `GET /api/jobs` · `GET /api/jobs/{id}` · `PUT /api/jobs/{id}` · `DELETE /api/jobs/{id}`
 - **Model:** `JobApplication` — id, company, position, status, date_applied, notes, follow_up_date
+- **Auth:** JWT implemented — `/auth/register` · `/auth/login` · `/auth/me`
+- **Password hashing:** bcrypt via passlib
+- **Job routes:** protected — require valid JWT token
 - **Database:** SQLite (dev) · PostgreSQL-ready via DATABASE_URL env var
-- **Auth:** Not yet implemented — planned (JWT or AWS Cognito under evaluation)
 - **Migrations:** Using `Base.metadata.create_all()` on startup — Alembic needed before production
 - **Docs:** Auto-generated Swagger UI at `http://localhost:8000/docs`
 
@@ -21,9 +23,9 @@
 - Next session will scaffold Expo Router project
 
 ### Known Issues / Tech Debt
-- No authentication on any endpoint — all routes are currently open
 - `Base.metadata.create_all()` is a dev shortcut — needs Alembic before production
 - CORS currently set to `allow_origins=["*"]` — must be locked down before production
+- SyntaxWarning in `schemas.py` line 65 — invalid escape sequence `\.` in docstring, needs raw string fix
 
 ---
 
@@ -64,6 +66,7 @@ tmux attach
 ---
 
 ## Project Structure
+
 ```
 tech-job-tracker/
 ├── CLAUDE.md                  # this file — living document, update often
@@ -75,14 +78,18 @@ tech-job-tracker/
 │   ├── models/
 │   │   ├── init.py
 │   │   ├── job_application.py # SQLAlchemy model
-│   │   └── schemas.py         # Pydantic request/response schemas
-│   └── routes/
-│       ├── init.py
-│       └── job_applications.py # CRUD route handlers
+│   │   ├── schemas.py         # Pydantic request/response schemas
+│   │   └── user.py            # User model for auth
+│   ├── routes/
+│   │   ├── init.py
+│   │   ├── auth.py            # JWT auth — register · login · me
+│   │   └── job_applications.py # CRUD route handlers (JWT protected)
+│   └── utils/                 # Shared utilities
 ├── mobile/                    # NOT CREATED YET — Expo scaffold next
 ├── .env                       # never commit this
-└── .env.example               # DATABASE_URL placeholder — safe to commit
+└── .env.example               # DATABASE_URL + JWT vars — safe to commit
 ```
+
 ---
 
 ## Stack & Commands
@@ -125,14 +132,14 @@ Never hardcode this — use environment config.
 | Samsung S23 Ultra | Stable Android | Sanity check — isolates beta OS issues |
 | Xiaomi Mi 11 | MIUI | Stress test — aggressive battery/process limits |
 
-If something looks broken: test on S23 Ultra first.
-If it works on S23 but not Pixel, suspect Android 17 beta.
+If something looks broken: test on S23 Ultra first.  
+If it works on S23 but not Pixel, suspect Android 17 beta.  
 If it works everywhere else but not Xiaomi, suspect MIUI killing background processes.
 
 ---
 
 ## Behavioral Guidelines
-Karpathy principles installed globally via plugin — applies to all sessions.
+Karpathy principles installed globally via plugin — applies to all sessions.  
 Plugin: forrestchang/andrej-karpathy-skills
 
 ---
@@ -144,7 +151,7 @@ This file is a living document — not a one-time setup.
 **After every correction during a session:**
 > "Update your CLAUDE.md so you don't make that mistake again."
 
-Claude is good at writing rules for itself. Use that.
+Claude is good at writing rules for itself. Use that.  
 Ruthlessly edit this file over time. Keep iterating until mistake rate drops.
 
 ---
@@ -183,8 +190,7 @@ I am actively learning while building. When making changes:
 2. **Flag anything security-related** — I want to understand security implications, not just accept them
 3. **If there is more than one way to solve something**, briefly mention the tradeoff so I can learn the decision-making
 4. **Don't hide complexity from me** — I want to understand the code, not just ship it
-5. **I review all generated code** — explain any non-obvious decision before moving on. I should be able to defend everything
-   in this codebase in an interview.
+5. **I review all generated code** — explain any non-obvious decision before moving on. I should be able to defend everything in this codebase in an interview.
 
 ---
 
@@ -223,7 +229,7 @@ Claude Code may generate commit messages during sessions. Standards:
 - **S3** — resume/document storage
 - **RDS (PostgreSQL)** — production database (DATABASE_URL already env-var driven ✅)
 - **Lambda** — background processing or notifications
-- **Cognito** — authentication (under evaluation)
+- **Cognito** — authentication (under evaluation — JWT already in place)
 
 Do not build for AWS yet. Flag any current decision that will affect future cloud integration.
 
