@@ -64,7 +64,7 @@ tmux attach
 ---
 
 ## Project Structure
-
+```
 tech-job-tracker/
 ├── CLAUDE.md                  # this file — living document, update often
 ├── PLAN.md                    # original backend build plan — reference only
@@ -82,7 +82,7 @@ tech-job-tracker/
 ├── mobile/                    # NOT CREATED YET — Expo scaffold next
 ├── .env                       # never commit this
 └── .env.example               # DATABASE_URL placeholder — safe to commit
-
+```
 ---
 
 ## Stack & Commands
