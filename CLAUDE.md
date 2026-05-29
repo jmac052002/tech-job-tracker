@@ -17,10 +17,14 @@
 - **Migrations:** Using `Base.metadata.create_all()` on startup — Alembic needed before production
 - **Docs:** Auto-generated Swagger UI at `http://localhost:8000/docs`
 
-### Frontend — NOT STARTED
-- Expo scaffold not yet created
-- `mobile/` directory does not exist yet
-- Next session will scaffold Expo Router project
+### Frontend — COMPLETE ✅
+- **Scaffold:** Expo SDK 56, Expo Router, TypeScript, Android-only
+- **Auth screens:** `(auth)/login.tsx` · `(auth)/register.tsx`
+- **App screens:** `(app)/jobs.tsx` (list + FAB) · `(app)/job/create.tsx` · `(app)/job/[id].tsx` (detail + edit + delete)
+- **Services layer:** `authService`, `jobsService`, `apiClient` (axios + JWT interceptor), `tokenStorage` (SecureStore)
+- **Auth context:** `AuthContext` with session restore on launch
+- **Navigation:** Expo Router group stacks with auth guards — unauthenticated users redirected to login
+- **API URL config:** env-driven via `app.config.ts` + `mobile/.env` — never hardcoded
 
 ### Known Issues / Tech Debt
 - `Base.metadata.create_all()` is a dev shortcut — needs Alembic before production
